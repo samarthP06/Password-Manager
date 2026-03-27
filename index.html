@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Manager</title>
+  <link rel="stylesheet" href="style.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <script src="script.js"></script>
+  <div class="app">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg></div>
+        <div>
+          <div class="logo-text">Sam29</div>
+          <div class="logo-sub">Password Manager</div>
+        </div>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z" />
+        </svg> Dark Mode
+      </button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('generator',this)">⚡ Generator</button>
+      <button class="tab" onclick="switchTab('strength',this)">🛡 Strength</button>
+      <button class="tab" onclick="switchTab('vault',this)">🗄 Vault</button>
+      <button class="tab" onclick="switchTab('breach',this)">🔍 Breach Check</button>
+    </div>
+
+    <!-- Generator -->
+    <div id="panel-generator" class="panel active">
+      <div class="card">
+        <div class="section-title">Generated Password</div>
+        <div class="gen-output">
+          <span id="genPw">Click generate below</span>
+          <button class="use-btn" onclick="usePassword()">↓ Use</button>
+          <button class="copy-btn" id="genCopyBtn" onclick="copyGenPw()">Copy</button>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Length</span>
+          <input type="range" min="8" max="64" value="16" id="lenSlider" step="1"
+            oninput="document.getElementById('lenVal').textContent=this.value;genPw()">
+          <span class="slider-val" id="lenVal">16</span>
+        </div>
+        <div class="toggle-grid">
+          <div class="toggle-item"><input type="checkbox" id="optU" checked onchange="genPw()"><label
+              for="optU">Uppercase (A–Z)</label></div>
+          <div class="toggle-item"><input type="checkbox" id="optL" checked onchange="genPw()"><label
+              for="optL">Lowercase (a–z)</label></div>
+          <div class="toggle-item"><input type="checkbox" id="optN" checked onchange="genPw()"><label for="optN">Numbers
+              (0–9)</label></div>
+          <div class="toggle-item"><input type="checkbox" id="optS" checked onchange="genPw()"><label for="optS">Symbols
+              (!@#…)</label></div>
+        </div>
+        <button class="gen-btn" onclick="genPw()">⚡ Generate Password</button>
+      </div>
+    </div>
+
+    <!-- Strength -->
+    <div id="panel-strength" class="panel">
+      <div class="card">
+        <div class="section-title">Check Password Strength</div>
+        <div class="input-wrap">
+          <input type="password" class="inp" id="strInput" placeholder="Type or paste a password…"
+            oninput="checkStr(this.value)">
+          <button class="eye-btn" id="eyeStr" onclick="toggleEye('strInput','eyeStr')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </div>
+        <div class="bar-wrap">
+          <div class="seg" id="s0"></div>
+          <div class="seg" id="s1"></div>
+          <div class="seg" id="s2"></div>
+          <div class="seg" id="s3"></div>
+        </div>
+        <div class="str-row">
+          <span class="str-lbl" id="strLbl" style="color:var(--text3)">—</span>
+          <span style="font-size:12px;color:var(--text2);font-weight:600" id="entLbl"></span>
+        </div>
+        <div class="tips" id="tips"></div>
+      </div>
+    </div>
+
+    <!-- Vault -->
+    <div id="panel-vault" class="panel">
+      <div id="pinBanner"></div>
+      <div class="lockout-bar" id="lockoutBar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;pointer-events:none">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <span id="lockoutMsg">Too many wrong attempts. Vault locked.</span>
+      </div>
+      <div class="card">
+        <div class="section-title">Add New Entry</div>
+        <div class="field-row">
+          <div>
+            <div class="field-label">Website / App</div><input class="inp plain" id="vSite"
+              placeholder="e.g. github.com">
+          </div>
+          <div>
+            <div class="field-label">Username / Email</div><input class="inp plain" id="vUser"
+              placeholder="your@email.com">
+          </div>
+        </div>
+        <div class="field-label" style="margin-bottom:5px">Password</div>
+        <div class="input-wrap">
+          <input type="password" class="inp" id="vPw" placeholder="Enter or use generated password…">
+          <button class="eye-btn" id="eyeVPw" onclick="toggleEye('vPw','eyeVPw')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </div>
+        <button class="add-btn" onclick="addEntry()">+ Add to Vault</button>
+      </div>
+      <div class="search-wrap">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input class="search-inp" id="searchInp" placeholder="Search by site or username…" oninput="renderVault()">
+      </div>
+      <div class="vault-list" id="vaultList"></div>
+    </div>
+
+    <!-- Breach Checker -->
+    <div id="panel-breach" class="panel">
+      <div class="card">
+        <div class="breach-hero">
+          <div class="breach-hero-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
+          <h2>Data Breach Checker</h2>
+          <p>Check if a password has appeared in known data breaches using the Have I Been Pwned database — without ever
+            sending your actual password.</p>
+        </div>
+        <div class="how-it-works">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <p><strong>How it works (k-anonymity):</strong> Your password is hashed with SHA-1. Only the first 5
+            characters of that hash are sent to HIBP. The API returns all hashes starting with those 5 chars. Your
+            browser then checks locally if the full hash matches. <strong>Your actual password never leaves your
+              device.</strong></p>
+        </div>
+        <div class="section-title">Check a Single Password</div>
+        <div class="breach-input-row">
+          <div class="input-wrap" style="flex:1;margin:0">
+            <input type="password" class="inp" id="breachInput" placeholder="Enter password to check…"
+              onkeydown="if(event.key==='Enter')checkSingle()">
+            <button class="eye-btn" id="eyeBreach" onclick="toggleEye('breachInput','eyeBreach')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+          <button class="check-btn" id="checkSingleBtn" onclick="checkSingle()">Check</button>
+        </div>
+        <div class="breach-result" id="singleResult"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Scan Vault Passwords</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6">Scan all saved passwords against
+          the HIBP breach database. Same k-anonymity — your passwords never leave your device.</p>
+        <button class="check-all-btn" id="checkAllBtn" onclick="checkAllVault()">🔍 Scan All Vault Passwords</button>
+        <div class="vault-scan-list" id="scanResults"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</body>
+
+</html>
